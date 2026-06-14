@@ -1,0 +1,14 @@
+# Kubeconfigs — never commit credentials
+*.kubeconfig
+.tunnel-mgmt.kubeconfig
+.tunnel-infra.kubeconfig
+mgmt-local.kubeconfig
+infra-local.kubeconfig
+
+# Generated files
+cloud-init.yaml
+
+# macOS
+.DS_Store
+__MACOSX/
+mgmt-local-tunnel.kubeconfig
