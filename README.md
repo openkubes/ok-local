@@ -41,7 +41,7 @@ Mac (Multipass host)
 ├── ok-mgmt-local  (192.168.x.x)          localhost:6443
 │   └── K3s v1.35 — management cluster
 │       ├── CAPI + CAPK  (Tutorial 3)
-│       ├── Crossplane   (Tutorial 4, coming soon)
+│       ├── Crossplane   (Tutorial 4)
 │       └── Argo CD      (Tutorial 5, coming soon)
 │
 └── ok-infra-local (192.168.x.y)          localhost:6444
@@ -67,6 +67,7 @@ Mac (Multipass host)
 | [Tutorial 1 — Management Cluster](docs/tutorial-mgmt.md) | Launch `ok-mgmt-local`, install K3s, configure kubectl access |
 | [Tutorial 2 — Workload Cluster](docs/tutorial-infra.md) | Launch `ok-infra-local`, install K3s + KubeVirt |
 | [Tutorial 3 — CAPI on ok-mgmt-local](docs/tutorial-capi.md) | Install CAPI + CAPK, manage VMs from the management cluster |
+| [Tutorial 4 — Crossplane on ok-mgmt-local](docs/tutorial-crossplane.md) | Install Crossplane, deploy Helm releases and K8s resources on ok-infra-local |
 | [KubeVirt on macOS (standalone)](docs/tutorial-basic.md) | Run a VM inside Kubernetes on your Mac — no OpenKubes required |
 
 ---
