@@ -106,3 +106,18 @@ make help           # Show all available targets
 - [openkubes/ok-linux](https://github.com/openkubes/ok-linux) — Linux node configuration
 - [KubeVirt documentation](https://kubevirt.io/user-guide/)
 - [K3s documentation](https://docs.k3s.io/)
+
+---
+
+## Roadmap
+
+| Tutorial | Status | Description |
+|---|---|---|
+| Tutorial 0 — Prerequisites | ✅ Done | Mac setup, Multipass, kubectl, aliases |
+| Tutorial 1 — Management Cluster | ✅ Done | ok-mgmt-local, K3s, SSH tunnel |
+| Tutorial 2 — Workload Cluster | ✅ Done | ok-infra-local, K3s, KubeVirt |
+| Tutorial 3 — CAPI | ✅ Done | CAPI + CAPK, VM lifecycle from mgmt |
+| Tutorial 4 — Crossplane | ✅ Done | provider-kubernetes + provider-helm |
+| Tutorial 5 — Argo CD | 🗺️ Planned | GitOps delivery on ok-mgmt-local |
+| Tutorial 6 — CAPI Workload Cluster | 🗺️ Planned | Full K8s cluster via CAPK + kubeadm |
+| Tutorial 7 — ok-gpu-local | 🗺️ Planned | GPU node simulation with Multipass |
