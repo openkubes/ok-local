@@ -35,7 +35,7 @@ Install with Homebrew:
 brew install multipass kubectl
 ```
 
-> **⚠️ Apple Silicon (M1/M2/M3) Note:** KubeVirt with software emulation (`useEmulation=true`) does not currently work on Apple Silicon Multipass VMs. The QEMU `host-passthrough` CPU mode is not supported on aarch64. This is a [known KubeVirt limitation](https://github.com/kubevirt/kubevirt/issues/11917). This tutorial is tested and supported on **Intel Mac only**. Apple Silicon support is tracked and will be updated when a workaround is available.
+> **⚠️ Apple Silicon (M1/M2/M3) Note:** KubeVirt's admission webhook only allows `host-passthrough` on ARM64 — but QEMU emulation does not support it. The workaround is to set `cpu.model: max` in the VM manifest (see Step 7). This is a [known KubeVirt limitation](https://github.com/kubevirt/kubevirt/issues/11917).
 
 ---
 
@@ -230,7 +230,9 @@ ssh ubuntu@$VM_IP "
 
 ## Step 7 — Deploy a VM inside Kubernetes
 
-Create a `VirtualMachine` manifest using an official Ubuntu 22.04 container disk image:
+Create a `VirtualMachine` manifest using an official Ubuntu 22.04 container disk image.
+
+> **Apple Silicon users:** Change `cpu.model` from `host-model` to `max` (see comment in the manifest).
 
 ```bash
 cat > vm-ubuntu.yaml << 'EOF'
@@ -247,7 +249,7 @@ spec:
     spec:
       domain:
         cpu:
-          model: host-model
+          model: host-model   # Intel: use host-model / Apple Silicon: use max
         devices:
           disks:
             - name: containerdisk
