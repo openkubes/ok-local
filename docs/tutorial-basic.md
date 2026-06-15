@@ -186,13 +186,22 @@ kubectl get kubevirt kubevirt -n kubevirt \
 
 ## Step 6 — Install virtctl
 
-`virtctl` is the KubeVirt CLI for starting, stopping, and connecting to VMs. Install it on the Multipass VM:
+`virtctl` is the KubeVirt CLI for starting, stopping, and connecting to VMs. The binary is architecture-specific — this step detects Intel (amd64) or Apple Silicon (arm64) automatically:
 
 ```bash
+# Detect VM architecture
+ARCH=$(ssh ubuntu@$VM_IP "uname -m")
+if [ "$ARCH" = "aarch64" ]; then
+  VIRTCTL_ARCH=arm64
+else
+  VIRTCTL_ARCH=amd64
+fi
+
+# Install virtctl on the VM
 ssh ubuntu@$VM_IP "
-  curl -LO "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/virtctl-${KUBEVIRT_VERSION}-linux-amd64"
-  sudo install "virtctl-${KUBEVIRT_VERSION}-linux-amd64" /usr/local/bin/virtctl
-  virtctl version
+  curl -LO https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/virtctl-${KUBEVIRT_VERSION}-linux-${VIRTCTL_ARCH}
+  sudo install virtctl-${KUBEVIRT_VERSION}-linux-${VIRTCTL_ARCH} /usr/local/bin/virtctl
+  sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml virtctl version
 "
 ```
 
