@@ -147,6 +147,19 @@ oil get pods -n kubevirt
 
 ## Troubleshooting
 
+**`multipass shell` fails with `No route to host`**
+This is a known bug in Multipass on recent macOS versions — the internal Multipass SSH key stops working. Use direct SSH instead:
+```bash
+# Instead of: multipass shell ok-mgmt-local
+ssh ubuntu@<VM_IP>
+
+# Or use the Makefile targets:
+make ssh-mgmt
+make ssh-infra
+```
+All tutorials in this repo use direct SSH — `multipass shell` is never required.
+
+
 **`connection refused` on K3s install**
 K3s needs 30–60 seconds after `systemd: Starting k3s` before the API is ready. The `make install-k3s-infra` target polls automatically — just wait.
 

@@ -183,3 +183,29 @@ On macOS, Multipass VMs live on a private bridge network (`192.168.x.x`). The K3
 - **Tutorial 1:** Setting up `ok-mgmt-local` (management cluster)
 - **Tutorial 2:** Setting up `ok-infra-local` (workload cluster + KubeVirt)
 - **Tutorial 3:** Installing CAPI and Crossplane on the management cluster
+
+---
+
+## Troubleshooting
+
+**`multipass shell` fails with `No route to host`**
+This is a known bug in Multipass on recent macOS versions — the internal Multipass SSH key stops working. Use direct SSH instead:
+```bash
+# Instead of: multipass shell kubevirt-local
+ssh ubuntu@<VM_IP>
+```
+All tutorials in this repo use direct SSH — `multipass shell` is never required.
+
+**`Permission denied (publickey)` when SSH-ing**
+macOS may pick the wrong SSH key. Fix by adding to `~/.ssh/config`:
+```bash
+cat >> ~/.ssh/config << 'EOF'
+
+# Multipass VMs
+Host 192.168.2.*
+  IdentityFile ~/.ssh/id_ed25519
+  User ubuntu
+  StrictHostKeyChecking accept-new
+EOF
+```
+Or explicitly specify the key: `ssh -i ~/.ssh/id_ed25519 ubuntu@<VM_IP>`

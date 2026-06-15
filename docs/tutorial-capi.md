@@ -228,6 +228,19 @@ A full working example will be covered in Tutorial 4.
 
 ## Troubleshooting
 
+**`multipass shell` fails with `No route to host`**
+This is a known bug in Multipass on recent macOS versions — the internal Multipass SSH key stops working. Use direct SSH instead:
+```bash
+# Instead of: multipass shell ok-mgmt-local
+ssh ubuntu@<VM_IP>
+
+# Or use the Makefile targets:
+make ssh-mgmt
+make ssh-infra
+```
+All tutorials in this repo use direct SSH — `multipass shell` is never required.
+
+
 **`'kubeconfig' key is missing` in CAPK logs**
 The secret was created with key `value` instead of `kubeconfig`. Recreate:
 ```bash

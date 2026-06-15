@@ -329,3 +329,29 @@ This tutorial runs KubeVirt on a single node. For a more complete local setup th
 👉 [github.com/openkubes](https://github.com/openkubes)
 
 OpenKubes provides a fully automated local dev environment (`ok-local`) and a production-ready stack on Hetzner bare metal (`ok-rke2`).
+
+---
+
+## Troubleshooting
+
+**`multipass shell` fails with `No route to host`**
+This is a known bug in Multipass on recent macOS versions — the internal Multipass SSH key stops working. Use direct SSH instead:
+```bash
+# Instead of: multipass shell kubevirt-local
+ssh ubuntu@<VM_IP>
+```
+All tutorials in this repo use direct SSH — `multipass shell` is never required.
+
+**`Permission denied (publickey)` when SSH-ing**
+macOS may pick the wrong SSH key. Fix by adding to `~/.ssh/config`:
+```bash
+cat >> ~/.ssh/config << 'EOF'
+
+# Multipass VMs
+Host 192.168.2.*
+  IdentityFile ~/.ssh/id_ed25519
+  User ubuntu
+  StrictHostKeyChecking accept-new
+EOF
+```
+Or explicitly specify the key: `ssh -i ~/.ssh/id_ed25519 ubuntu@<VM_IP>`
