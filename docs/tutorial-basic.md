@@ -148,11 +148,11 @@ kubectl get nodes
 Get the latest stable version and apply the operator and CR:
 
 ```bash
-export VERSION=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
-echo "Installing KubeVirt $VERSION"
+export KUBEVIRT_VERSION=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
+echo "Installing KubeVirt $KUBEVIRT_VERSION"
 
-kubectl apply -f https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml
-kubectl apply -f https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-cr.yaml
+kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
+kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-cr.yaml"
 ```
 
 Wait until KubeVirt is fully deployed (1–3 minutes):
@@ -190,8 +190,8 @@ kubectl get kubevirt kubevirt -n kubevirt \
 
 ```bash
 ssh ubuntu@$VM_IP "
-  curl -LO https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/virtctl-${VERSION}-linux-amd64
-  sudo install virtctl-${VERSION}-linux-amd64 /usr/local/bin/virtctl
+  curl -LO "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/virtctl-${KUBEVIRT_VERSION}-linux-amd64"
+  sudo install "virtctl-${KUBEVIRT_VERSION}-linux-amd64" /usr/local/bin/virtctl
   virtctl version
 "
 ```
