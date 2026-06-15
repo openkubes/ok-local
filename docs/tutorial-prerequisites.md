@@ -66,15 +66,15 @@ kubectl version --client
 The VMs are configured via cloud-init which injects your public key at boot. Check if you already have one:
 
 ```bash
-cat ~/.ssh/id_rsa.pub
+cat ~/.ssh/id_ed25519.pub
 ```
 
 If not, generate one:
 ```bash
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
 ```
 
-> **Why RSA?** The Makefile defaults to `~/.ssh/id_rsa.pub`. You can change `SSH_KEY` in the Makefile to use `~/.ssh/id_ed25519.pub` if you prefer Ed25519.
+> **Why Ed25519?** macOS generates `id_ed25519` by default since Ventura. The Makefile automatically detects `id_ed25519.pub` first, falling back to `id_rsa.pub`.
 
 ---
 
@@ -114,7 +114,7 @@ source ~/.zshrc
 ```bash
 multipass version    # Multipass 1.x.x
 kubectl version --client  # Client Version: v1.x.x
-cat ~/.ssh/id_rsa.pub     # ssh-rsa AAAA...
+cat ~/.ssh/id_ed25519.pub     # ssh-rsa AAAA...
 ls ok-local/Makefile      # Makefile exists
 ```
 

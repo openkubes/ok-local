@@ -13,7 +13,7 @@ INFRA_IP     := $(shell multipass list --format csv 2>/dev/null | grep $(INFRA_V
 CPUS         := 4
 MEMORY       := 8G
 DISK         := 40G
-SSH_KEY      := $(HOME)/.ssh/id_rsa.pub
+SSH_KEY      := $(shell ls $(HOME)/.ssh/id_ed25519.pub 2>/dev/null || echo $(HOME)/.ssh/id_rsa.pub)
 K3S_VERSION  := v1.35.5+k3s1
 
 # Two separate clusters — each VM is its own K3s server.

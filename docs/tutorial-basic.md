@@ -27,7 +27,7 @@ On macOS, Multipass VMs do not expose `/dev/kvm`, so KubeVirt runs in **software
 - macOS 12 or later (Intel or Apple Silicon)
 - [Multipass](https://multipass.run/) installed
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/) installed
-- SSH key at `~/.ssh/id_rsa.pub`
+- SSH key at `~/.ssh/id_ed25519.pub` (or `id_rsa.pub`)
 
 Install with Homebrew:
 
@@ -49,7 +49,7 @@ users:
   - name: ubuntu
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-      - $(cat ~/.ssh/id_rsa.pub)
+      - $(cat ~/.ssh/id_ed25519.pub 2>/dev/null || cat ~/.ssh/id_rsa.pub)
 EOF
 ```
 
