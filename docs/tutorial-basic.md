@@ -216,6 +216,8 @@ spec:
         kubevirt.io/domain: ubuntu-vm
     spec:
       domain:
+        cpu:
+          model: host-model   # compatible with Intel and Apple Silicon
         devices:
           disks:
             - name: containerdisk
@@ -225,9 +227,8 @@ spec:
           interfaces:
             - name: default
               masquerade: {}
-        resources:
-          requests:
-            memory: 1500Mi
+        memory:
+          guest: 1500Mi
       networks:
         - name: default
           pod: {}
