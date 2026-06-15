@@ -87,6 +87,28 @@ cd ok-local
 
 ---
 
+
+## Step 5 — Configure SSH for Multipass VMs
+
+Add a Multipass entry to `~/.ssh/config` so SSH automatically uses the right key and accepts new hosts:
+
+```bash
+cat >> ~/.ssh/config << 'SSHEOF'
+
+# Multipass VMs
+Host 192.168.2.*
+  IdentityFile ~/.ssh/id_ed25519
+  User ubuntu
+  StrictHostKeyChecking accept-new
+SSHEOF
+```
+
+> **Why this is needed:** macOS may have multiple SSH keys and pick the wrong one automatically. This config ensures Multipass VMs always use `id_ed25519` without needing `-i ~/.ssh/id_ed25519` every time.
+
+> **Note:** If Multipass assigns IPs in a different range (e.g. `192.168.64.*` on Apple Silicon), adjust the `Host` line accordingly.
+
+---
+
 ## Step 6 — Set up shell aliases
 
 Add these to your `~/.zshrc` (or `~/.bashrc`):
