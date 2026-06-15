@@ -24,7 +24,7 @@ On macOS, Multipass VMs do not expose `/dev/kvm`, so KubeVirt runs in **software
 
 ## Prerequisites
 
-- macOS 12 or later (Intel or Apple Silicon)
+- macOS 12 or later — **Intel Mac recommended** (see Apple Silicon note below)
 - [Multipass](https://multipass.run/) installed
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/) installed
 - SSH key at `~/.ssh/id_ed25519.pub` (or `id_rsa.pub`)
@@ -34,6 +34,8 @@ Install with Homebrew:
 ```bash
 brew install multipass kubectl
 ```
+
+> **⚠️ Apple Silicon (M1/M2/M3) Note:** KubeVirt with software emulation (`useEmulation=true`) does not currently work on Apple Silicon Multipass VMs. The QEMU `host-passthrough` CPU mode is not supported on aarch64. This is a [known KubeVirt limitation](https://github.com/kubevirt/kubevirt/issues/11917). This tutorial is tested and supported on **Intel Mac only**. Apple Silicon support is tracked and will be updated when a workaround is available.
 
 ---
 
@@ -166,12 +168,31 @@ kubectl wait --for=jsonpath='{.status.phase}'=Deployed \
 
 ## Step 5 — Enable software emulation
 
-Multipass VMs do not provide `/dev/kvm`. Tell KubeVirt to use QEMU software emulation instead:
+Multipass VMs do not provide `/dev/kvm`. Tell KubeVirt to use QEMU software emulation instead.
+
+First detect your Mac architecture:
 
 ```bash
-kubectl patch kubevirt kubevirt -n kubevirt \
-  --type merge \
-  -p '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}'
+MAC_ARCH=$(ssh ubuntu@$VM_IP "uname -m")
+echo "VM architecture: $MAC_ARCH"
+```
+
+Then apply the correct emulation config:
+
+```bash
+# For Intel Mac (x86_64)
+if [ "$MAC_ARCH" = "x86_64" ]; then
+  kubectl patch kubevirt kubevirt -n kubevirt \
+    --type merge \
+    -p '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}'
+fi
+
+# For Apple Silicon (aarch64) — needs explicit CPU config
+if [ "$MAC_ARCH" = "aarch64" ]; then
+  kubectl patch kubevirt kubevirt -n kubevirt \
+    --type merge \
+    -p '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true},"emulatedMachines":["virt*"]}}}'
+fi
 ```
 
 Verify:
@@ -226,7 +247,7 @@ spec:
     spec:
       domain:
         cpu:
-          model: host-model   # compatible with Intel and Apple Silicon
+          model: host-model
         devices:
           disks:
             - name: containerdisk
