@@ -1,0 +1,19 @@
+apiVersion: helm.crossplane.io/v1beta1
+kind: Release
+metadata:
+  name: podinfo-docker-test
+spec:
+  providerConfigRef:
+    name: ok-infra-docker-test
+  forProvider:
+    chart:
+      name: podinfo
+      repository: https://stefanprodan.github.io/podinfo
+      version: 6.7.1
+    namespace: ok-crossplane-docker-test
+    skipCreateNamespace: true
+    wait: true
+    waitTimeout: 5m
+    values:
+      replicaCount: 1
+

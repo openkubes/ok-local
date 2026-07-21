@@ -1,0 +1,21 @@
+apiVersion: helm.crossplane.io/v1beta1
+kind: Release
+metadata:
+  name: rmf-docker-test
+spec:
+  providerConfigRef:
+    name: ok-infra-docker-test
+  forProvider:
+    chart:
+      url: https://github.com/openkubes/rmf_deployment_template/releases/download/openrmf-deployment-v1.0.0/openrmf-deployment-1.0.0.tgz
+    namespace: rmf-docker-test
+    skipCreateNamespace: true
+    wait: true
+    waitTimeout: 20m
+    valuesFrom:
+      - secretKeyRef:
+          name: rmf-docker-test-values
+          namespace: crossplane-system
+          key: values.yaml
+          optional: false
+

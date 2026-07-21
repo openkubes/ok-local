@@ -1,0 +1,24 @@
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: ok-infra-docker-test
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: docker-desktop-kubeconfig
+      key: kubeconfig
+---
+apiVersion: helm.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: ok-infra-docker-test
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: docker-desktop-kubeconfig
+      key: kubeconfig
+

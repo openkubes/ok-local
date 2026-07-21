@@ -1,0 +1,28 @@
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: ok-docker-test-namespace
+spec:
+  providerConfigRef:
+    name: ok-infra-docker-test
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: ok-crossplane-docker-test
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: rmf-docker-test-namespace
+spec:
+  providerConfigRef:
+    name: ok-infra-docker-test
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: rmf-docker-test
+

@@ -1,0 +1,25 @@
+hostName: rmf.test
+baseUrl: https://rmf.test
+
+ENABLE_RMF_SIM: __ENABLE_RMF_SIM__
+ENABLE_RMF: false
+
+ingress:
+  provider: traefik
+  className: traefik
+
+tls:
+  enabled: true
+  useTraefikDefaultCertificate: true
+
+monitoring:
+  enabled: false
+
+rmf_web:
+  API_SERVER_DB_PASSWD: "__RMF_DB_PASSWORD__"
+  ADMIN_PASSWD: "__RMF_ADMIN_PASSWORD__"
+
+keycloak:
+  KEYCLOAK_ADMIN_PASSWD: "__KEYCLOAK_ADMIN_PASSWORD__"
+  KEYCLOAK_DB_PASSWD: "__KEYCLOAK_DB_PASSWORD__"
+

@@ -68,6 +68,7 @@ Mac (Multipass host)
 | [Tutorial 2 — Workload Cluster](docs/tutorial-infra.md) | Launch `ok-infra-local`, install K3s + KubeVirt |
 | [Tutorial 3 — CAPI on ok-mgmt-local](docs/tutorial-capi.md) | Install CAPI + CAPK, manage VMs from the management cluster |
 | [Tutorial 4 — Crossplane on ok-mgmt-local](docs/tutorial-crossplane.md) | Install Crossplane, deploy Helm releases and K8s resources on ok-infra-local |
+| [OpenRMF on Multipass through Crossplane](docs/tutorial-multipass-crossplane.md) | Deploy OpenRMF to `ok-infra-local` from Crossplane on `ok-mgmt-local` |
 | [KubeVirt on macOS (standalone)](docs/tutorial-basic.md) | Run a VM inside Kubernetes on your Mac — no OpenKubes required |
 
 ---
