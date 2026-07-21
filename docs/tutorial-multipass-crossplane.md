@@ -1,8 +1,9 @@
 # Tutorial: Deploy OpenRMF on Multipass through Crossplane
 
-This tutorial uses the `ok-local` Makefile and continues the management/infra
-cluster workflow from Tutorials 1, 2, and 4. It documents the OpenRMF-specific
-values, ingress, Crossplane Release, validation, and cleanup steps.
+This tutorial uses the Makefile attached to Jira OK-101, preserved at
+[`reference/ok-101/Makefile`](../reference/ok-101/Makefile). It documents the
+OpenRMF-specific values, two-cluster K3s workflow, ingress, Crossplane Release,
+validation, and cleanup steps without changing the repository's root Makefile.
 
 The resulting test has two Multipass VMs:
 
@@ -28,36 +29,43 @@ cluster as both the management and target cluster, however, so it does not
 replace the final two-VM test of Multipass networking, kubeconfig transfer,
 and SSH tunnels or establish a recommended steady-state allocation.
 
-## 1. Important behavior of the repository Makefile
+## 1. Important behavior of the OK-101 Makefile
 
 Read these points before running it:
 
-- Run commands from the cloned `ok-local` repository root.
-- The Makefile's `setup` target also installs KubeVirt on infra. KubeVirt is
-  not required for OpenRMF; use the individual VM and K3s targets below for a
-  smaller test environment.
-- The Makefile disables packaged Traefik on both clusters. This guide installs
+- Keep the runner named `Makefile` and run its targets from
+  `reference/ok-101`. Its recursive Make calls depend on that layout.
+- Do **not** run `setup`, `tutorials`, `tutorial-3`, or `tutorial-4` for the
+  no-KubeVirt OpenRMF path. Those targets install CAPI/CAPK with the KubeVirt
+  infrastructure provider.
+- Run `tutorial-2` and the individual Crossplane targets in section 9.
+- The runner disables packaged Traefik on both clusters. This guide installs
   Traefik separately on the infra cluster because the OpenRMF chart requires
   its `IngressRoute` and `Middleware` CRDs.
-- Tutorial 4's Crossplane example deploys `podinfo`; it does not deploy
+- The runner's Crossplane example deploys `podinfo`; it does not deploy
   OpenRMF. This guide adds the OpenRMF `Release` after the example succeeds.
 - Generated kubeconfigs contain administrator credentials and are ignored by
   this repository. Do not commit or share them.
+- The runner's `clean` target invokes global `multipass purge`. Use the scoped
+  cleanup in section 17 when other deleted Multipass instances must remain
+  recoverable.
 
 ## 2. What must be supplied or changed
 
-The VM defaults are near the top of `Makefile`. Supply chart values through
-the gitignored generated overlay described in section 5.
+The VM defaults are near the top of `reference/ok-101/Makefile`. Override them
+on the `gmake` command line if required, and supply chart values through the
+gitignored generated overlay described in section 5.
 
 | Value | Where it is set | Required test value | Reason |
 |---|---|---|---|
-| `MGMT_VM` | Makefile default | `ok-mgmt-local` | Hosts Crossplane. |
-| `INFRA_VM` | Makefile default | `ok-infra-local` | Hosts OpenRMF and ingress. |
-| `CPUS`, `MEMORY`, `DISK` | Makefile defaults, per VM | `4`, `8G`, `40G` | Start with the repository values; increase only after an observed resource failure. |
-| `K3S_VERSION` | Makefile default | `v1.35.5+k3s1` | Keep the repository's tested version unless the owner approves an upgrade. |
+| `MGMT_NAME` | OK-101 Makefile default | `ok-mgmt-local` | Hosts Crossplane. |
+| `INFRA_NAME` | OK-101 Makefile default | `ok-infra-local` | Hosts OpenRMF and ingress. |
+| `MGMT_CPUS`, `MGMT_MEMORY`, `MGMT_DISK` | OK-101 Makefile defaults | `4`, `8G`, `40G` | Starting allocation for the management VM. |
+| `INFRA_CPUS`, `INFRA_MEMORY`, `INFRA_DISK` | OK-101 Makefile defaults | `4`, `8G`, `40G` | Starting allocation for the infra VM; increase only after observed pressure. |
+| `K3S_VERSION` | OK-101 Makefile default | `v1.35.5+k3s1` | Keep the runner's tested version unless the owner approves an upgrade. |
 | Traefik chart | This guide | `40.2.0` | Supplies ingress because packaged Traefik is disabled. |
-| Crossplane providers | Tutorial 4 | Kubernetes `v0.14.1`, Helm `v1.2.0` | Keep Tutorial 4's versions for this test. |
-| Helm ProviderConfig | Tutorial 4 | `ok-infra-local` | Makes the provider on management deploy into infra. |
+| Crossplane providers | OK-101 Makefile | Kubernetes `v0.14.1`, Helm `v1.2.0` | Keep the runner's versions for this test. |
+| Helm ProviderConfig | OK-101 Makefile | `ok-infra-local` | Makes the provider on management deploy into infra. |
 | OpenRMF chart | Crossplane `Release` below | `1.0.0` release asset | Crossplane cannot read a chart directory from the workstation. |
 | `hostName` | Local RMF values overlay | `rmf.test` | Local hostname for Traefik routes. |
 | `baseUrl` | Local RMF values overlay | `https://rmf.test` | Browser, Keycloak, dashboard, and API redirects must agree. |
@@ -66,15 +74,24 @@ the gitignored generated overlay described in section 5.
 
 ## 3. Workstation prerequisites
 
-The repository is macOS-oriented and expects Make, Multipass, `kubectl`, Helm,
-Git, SSH, curl, and OpenSSL:
+The runner is macOS-oriented and expects Homebrew, GNU Make, Multipass,
+`kubectl`, Helm, `clusterctl`, Git, SSH, curl, and OpenSSL. Its prerequisite
+target checks or installs the main command-line dependencies:
 
 ```bash
 brew install --cask multipass
-brew install kubectl helm openssl
+brew install make kubectl helm clusterctl openssl
 ```
 
-With its defaults, the Makefile allocates the following logical VM capacity:
+Homebrew installs modern GNU Make as `gmake` by default. Use `gmake` for the
+individual targets in this tutorial because the runner relies on `.ONESHELL`.
+Its `make setup` entry point can bootstrap `gmake`, but it also continues
+through Tutorials 3-4 and is therefore not the OpenRMF path used here. Plain
+`make` is interchangeable only when `make --version` identifies a modern GNU
+Make provided through the workstation's `PATH`.
+
+With its defaults, the OK-101 Makefile allocates the following logical VM
+capacity:
 
 - 8 virtual CPUs in total;
 - 16 GiB VM RAM in total;
@@ -84,12 +101,13 @@ These are allocations, not a statement that OpenRMF itself consumes those
 resources. Virtual CPUs need not be dedicated physical cores, and Multipass
 disks are normally thin-provisioned. In the validated WSL + Docker preflight,
 all application pods, including `rmf-sim`, scheduled and started on a single
-2-CPU/4-GiB node. Start with the repository defaults for the two-VM handoff
+2-CPU/4-GiB node. Start with the runner defaults for the two-VM handoff
 and increase them only if the actual run shows scheduling, OOM, or
 disk-pressure failures.
 
-The Makefile expects a usable `~/.ssh/id_ed25519.pub` or
-`~/.ssh/id_rsa.pub`. Create one before starting if neither exists.
+The prerequisite target generates `~/.ssh/id_ed25519` when neither supported
+public key exists. It can also add a `Host 192.168.2.*` block to
+`~/.ssh/config`; review that behavior first on managed workstations.
 
 ## 4. Architecture preflight
 
@@ -144,7 +162,7 @@ The tested automation and manifests are preserved in
 | OpenRMF chart | `1.0.0` |
 
 The Docker Desktop kubeconfig was stored in the management cluster as a Secret
-and used by ProviderConfigs, matching Tutorial 4's credential flow. The
+and used by ProviderConfigs, matching the OK-101 runner's credential flow. The
 namespace and `podinfo` checks reconciled as `Synced=True, Ready=True`. The
 dashboard and Keycloak HTTPS routes were reached successfully; the API route
 reached Uvicorn; both PVCs bound; and `rmf-sim` scheduled and started on the
@@ -157,7 +175,8 @@ It does not prove that one Multipass VM can reach the other VM's Kubernetes API.
 
 ## 5. Create the local OpenRMF values overlay
 
-From the repository root, generate this ignored file:
+From the repository root, record its absolute path and generate this ignored
+file:
 
 ```text
 reference/docker-desktop-crossplane/.state/rmf-values.yaml
@@ -166,8 +185,10 @@ reference/docker-desktop-crossplane/.state/rmf-values.yaml
 The helper creates four independent passwords and fills the tested template:
 
 ```bash
+export OK_LOCAL_ROOT="$(git rev-parse --show-toplevel)"
+cd "${OK_LOCAL_ROOT}"
 ./reference/docker-desktop-crossplane/scripts/generate-values.sh true
-export RMF_VALUES_FILE="$PWD/reference/docker-desktop-crossplane/.state/rmf-values.yaml"
+export RMF_VALUES_FILE="${OK_LOCAL_ROOT}/reference/docker-desktop-crossplane/.state/rmf-values.yaml"
 ```
 
 The generated content is equivalent to the following (passwords are filled
@@ -271,17 +292,18 @@ rm /tmp/rmf-multipass-rendered.yaml /tmp/openrmf-deployment-1.0.0.tgz
 
 ## 7. Create the management and infra clusters without KubeVirt
 
-From the repository root, create only the clusters required by this tutorial:
+Enter the OK-101 runner directory and run Tutorial 2. This creates both VMs,
+installs K3s, writes the kubeconfigs, and starts the tunnels without installing
+CAPI/CAPK/KubeVirt:
 
 ```bash
-make up-mgmt
-make install-k3s-mgmt
-make up-infra
-make install-k3s-infra
+cd "${OK_LOCAL_ROOT}/reference/ok-101"
+gmake tutorial-2
 ```
 
-If Tutorials 1 and 2 are already complete, restart the VMs and tunnels instead.
-`make setup` also installs KubeVirt, which is not required here.
+Do not substitute `setup` or `tutorial-4`; both transitively run Tutorial 3.
+If Tutorial 2 is already complete, restart the VMs if necessary and run
+`gmake tunnels`.
 
 Verify the actual guest architectures:
 
@@ -295,9 +317,9 @@ Both commands must print `amd64`.
 Define context-specific paths for the remaining workstation commands:
 
 ```bash
-export OK_LOCAL_ROOT="$PWD"
-export MGMT_KUBECONFIG="${OK_LOCAL_ROOT}/.tunnel-mgmt.kubeconfig"
-export INFRA_KUBECONFIG="${OK_LOCAL_ROOT}/.tunnel-infra.kubeconfig"
+export OK101_WORKDIR="$PWD"
+export MGMT_KUBECONFIG="${OK101_WORKDIR}/.tunnel-mgmt.kubeconfig"
+export INFRA_KUBECONFIG="${OK101_WORKDIR}/.tunnel-infra.kubeconfig"
 ```
 
 Verify both APIs:
@@ -307,15 +329,15 @@ KUBECONFIG="${MGMT_KUBECONFIG}" kubectl get nodes -o wide
 KUBECONFIG="${INFRA_KUBECONFIG}" kubectl get nodes -o wide
 ```
 
-If a tunnel is no longer running, restart both from the repository root:
+If a tunnel is no longer running, restart both from `reference/ok-101`:
 
 ```bash
-make tunnels
+gmake tunnels
 ```
 
 ## 8. Install Traefik on the infra cluster
 
-The Makefile installs infra K3s with `--disable traefik`, so install Traefik
+The OK-101 Makefile installs infra K3s with `--disable traefik`, so install Traefik
 only against `INFRA_KUBECONFIG`:
 
 ```bash
@@ -333,7 +355,7 @@ KUBECONFIG="${INFRA_KUBECONFIG}" \
 ```
 
 The chart creates a `LoadBalancer` Service exposing `web` on 80 and
-`websecure` on 443. K3s ServiceLB, which the Makefile does not disable,
+`websecure` on 443. K3s ServiceLB, which the runner does not disable,
 publishes those ports on the infra VM.
 
 Validate all required facilities on infra:
@@ -356,8 +378,16 @@ Do not continue unless Traefik is ready, its Service exposes 80/443, and
 
 ## 9. Install Crossplane and validate remote reconciliation
 
-Complete [Tutorial 4](tutorial-crossplane.md) through its `podinfo` validation.
-That tutorial:
+Run the individual runner targets from `reference/ok-101`:
+
+```bash
+gmake install-crossplane
+gmake install-crossplane-providers
+gmake crossplane-provider-configs
+gmake crossplane-examples
+```
+
+These targets:
 
 1. installs Crossplane on management;
 2. installs provider-kubernetes and provider-helm;
@@ -395,7 +425,7 @@ Provider-helm reads `valuesFrom` Secrets from the cluster where the provider
 runs. Therefore the values Secret belongs on **management**, even though the
 Helm release is installed on **infra**.
 
-Run from the repository root, using the absolute kubeconfig path established
+Run from the current runner directory using the absolute paths established
 above:
 
 ```bash
@@ -567,10 +597,10 @@ restart.
 
 ### A kubeconfig stops responding
 
-From the repository root:
+From `reference/ok-101`:
 
 ```bash
-make tunnels
+gmake tunnels
 ```
 
 Then repeat both `kubectl get nodes` checks. Port 6443 is management and port
@@ -710,11 +740,13 @@ multipass delete --purge ok-mgmt-local ok-infra-local
 
 Remove the `rmf.test` entry from `/etc/hosts`. Generated kubeconfigs and local
 credentials should be retained only while their administrator access is
-needed. The repository's `make clean` deletes the two named VMs and generated
-kubeconfig files; it does not invoke a global Multipass purge.
+needed. Do not use the OK-101 Makefile's `clean` target when unrelated deleted
+Multipass instances must remain recoverable; it invokes global
+`multipass purge`.
 
 ## 18. References
 
+- [OK-101 local environment runner](../reference/ok-101/README.md)
 - [Jira OK-101](https://kubernauts.atlassian.net/browse/OK-101)
 - [K3s networking services](https://docs.k3s.io/networking/networking-services)
 - [K3s packaged components](https://docs.k3s.io/installation/packaged-components)
