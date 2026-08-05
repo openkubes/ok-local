@@ -89,6 +89,11 @@ syft "$IMG_REF" -o spdx-json > "$WORKDIR/sbom.spdx.json"
     "sbom.spdx.json:application/json"
 )
 echo "  referrers for $IMG_REF:"
+REFERRERS_JSON="$(oras discover --format json --depth 1 "$IMG_REF")"
+jq -e --arg digest "$DIGEST" '
+  (.subject.digest // .digest) == $digest and
+  any(.referrers[]?; .artifactType == "application/spdx+json")
+' <<<"$REFERRERS_JSON" >/dev/null
 oras discover --format tree "$IMG_REF"
 pass "SBOM attached + discoverable via Referrers API"
 
@@ -111,7 +116,8 @@ printf '%s' "$PULL_PASS" | crane auth login "$REG" \
 crane pull "$IMG_REF" "$WORKDIR/alpine-as-puller.tar"
 pass "puller successfully read an existing image"
 
-if crane copy alpine:3.20 "${REG}/${NS}/should-fail:latest" 2>/dev/null; then
+DENIED_REF="${REG}/${NS}/should-fail-${RUN_ID}:latest"
+if crane copy alpine:3.20 "$DENIED_REF" 2>/dev/null; then
   echo "  ❌ puller was able to push — accessControl is wrong"
   exit 1
 else
