@@ -1,0 +1,6 @@
+# Generated OCI Distribution conformance evidence stays local. Attach the
+# report to OK-137 instead of committing large generated HTML/JUnit artifacts.
+contract/tests/results*/
+
+# Kustomize's Helm inflator cache; the chart is fetched from the pinned repo.
+charts/

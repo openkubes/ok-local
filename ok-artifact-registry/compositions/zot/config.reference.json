@@ -2,10 +2,10 @@
   "distSpecVersion": "1.1.0",
   "storage": {
     "rootDirectory": "/var/lib/registry",
-    "dedupe": true,
+    "dedupe": false,
     "gc": true,
-    "gcDelay": "1h",
-    "gcInterval": "24h"
+    "gcDelay": "10s",
+    "gcInterval": "30s"
   },
   "http": {
     "address": "0.0.0.0",
@@ -16,6 +16,9 @@
       }
     },
     "accessControl": {
+      "metrics": {
+        "users": ["admin"]
+      },
       "repositories": {
         "**": {
           "policies": [
@@ -35,6 +38,6 @@
   "extensions": {
     "search": { "enable": true },
     "metrics": { "enable": true, "prometheus": { "path": "/metrics" } },
-    "scrub": { "enable": true, "interval": "24h" }
+    "scrub": { "enable": true, "interval": "1m" }
   }
 }

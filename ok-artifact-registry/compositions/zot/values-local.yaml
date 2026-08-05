@@ -8,7 +8,9 @@
 
 image:
   repository: ghcr.io/project-zot/zot
-  tag: "v2.1.17"          # pin explicitly; verify against chart appVersion
+  # v2.1.20 fixes the Referrers API, empty-blob, and digest validation failures
+  # observed with the chart's v2.1.18 appVersion during the OCI contract run.
+  tag: "v2.1.20"
   pullPolicy: IfNotPresent
 
 # Local access via `kubectl port-forward` (see Makefile `port-forward`).
@@ -54,16 +56,19 @@ configFiles:
       "distSpecVersion": "1.1.0",
       "storage": {
         "rootDirectory": "/var/lib/registry",
-        "dedupe": true,
+        "dedupe": false,
         "gc": true,
-        "gcDelay": "1h",
-        "gcInterval": "24h"
+        "gcDelay": "10s",
+        "gcInterval": "30s"
       },
       "http": {
         "address": "0.0.0.0",
         "port": "5000",
         "auth": { "htpasswd": { "path": "/secret/htpasswd" } },
         "accessControl": {
+          "metrics": {
+            "users": ["admin"]
+          },
           "repositories": {
             "**": {
               "policies": [
@@ -83,6 +88,6 @@ configFiles:
       "extensions": {
         "search":  { "enable": true },
         "metrics": { "enable": true, "prometheus": { "path": "/metrics" } },
-        "scrub":   { "enable": true, "interval": "24h" }
+        "scrub":   { "enable": true, "interval": "1m" }
       }
     }
