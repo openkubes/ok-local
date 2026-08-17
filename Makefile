@@ -39,6 +39,7 @@ MODEL             ?= qwen2.5:0.5b
 WEBUI_DIR              := platform/ai/open-webui/crossplane
 WEBUI_CHART_VERSION    ?= 14.6.0
 MGMT_KUBECONFIG        ?= $(abspath $(TUNNEL_MGMT))
+INFRA_KUBECONFIG       ?= $(abspath $(KUBECONFIG_INFRA))
 CLUSTER                ?= ok-infra-local
 OLLAMA_ENDPOINT        ?= http://ollama.ollama.svc.cluster.local:11434
 WEBUI_NAMESPACE        ?= open-webui
@@ -489,6 +490,20 @@ ollama-status: ## Show Ollama workload status on ok-infra-local
 # ─── Open WebUI through Crossplane (management → workload cluster) ──────────
 webui-setup: ## Generate and install the Open WebUI Function, XRD, and Composition
 	@test -f "$(MGMT_KUBECONFIG)" || { echo "❌ Missing MGMT_KUBECONFIG: $(MGMT_KUBECONFIG)"; exit 1; }
+	@test -f "$(INFRA_KUBECONFIG)" || { echo "❌ Missing INFRA_KUBECONFIG: $(INFRA_KUBECONFIG)"; exit 1; }
+	@if grep -Eq 'server: https?://(localhost|127\.0\.0\.1)' "$(INFRA_KUBECONFIG)"; then \
+	  echo "❌ INFRA_KUBECONFIG must use the direct infra VM address, not localhost"; \
+	  exit 1; \
+	fi
+	@echo "🔐 Configuring Helm provider access to $(CLUSTER)..."
+	@KUBECONFIG="$(MGMT_KUBECONFIG)" kubectl create secret generic infra-kubeconfig \
+	  --namespace crossplane-system \
+	  --from-file=kubeconfig="$(INFRA_KUBECONFIG)" \
+	  --dry-run=client -o yaml | \
+	  KUBECONFIG="$(MGMT_KUBECONFIG)" kubectl apply -f -
+	@printf '%s\n' \
+	  '{"apiVersion":"helm.crossplane.io/v1beta1","kind":"ProviderConfig","metadata":{"name":"$(CLUSTER)"},"spec":{"credentials":{"source":"Secret","secretRef":{"namespace":"crossplane-system","name":"infra-kubeconfig","key":"kubeconfig"}}}}' | \
+	  KUBECONFIG="$(MGMT_KUBECONFIG)" kubectl apply -f -
 	@mkdir -p "$(WEBUI_DIR)"
 	@printf '%s\n' "$$WEBUI_FUNCTION_YAML" > "$(WEBUI_DIR)/function.yaml"
 	@printf '%s\n' "$$WEBUI_DEFINITION_YAML" > "$(WEBUI_DIR)/definition.yaml"
@@ -511,6 +526,10 @@ webui-deploy: ## Generate and deploy an Open WebUI claim to the workload cluster
 	@test -f "$(MGMT_KUBECONFIG)" || { echo "❌ Missing MGMT_KUBECONFIG: $(MGMT_KUBECONFIG)"; exit 1; }
 	@test -n "$(CLUSTER)" || { echo "❌ CLUSTER must not be empty"; exit 1; }
 	@test -n "$(OLLAMA_ENDPOINT)" || { echo "❌ OLLAMA_ENDPOINT must not be empty"; exit 1; }
+	@echo "📁 Ensuring claim namespace $(WEBUI_CLAIM_NAMESPACE) exists..."
+	@KUBECONFIG="$(MGMT_KUBECONFIG)" kubectl create namespace \
+	  "$(WEBUI_CLAIM_NAMESPACE)" --dry-run=client -o yaml | \
+	  KUBECONFIG="$(MGMT_KUBECONFIG)" kubectl apply -f -
 	@mkdir -p "$(WEBUI_DIR)/generated"
 	@printf '%s\n' "$$WEBUI_CLAIM_YAML" > "$(WEBUI_DIR)/generated/$(CLUSTER)-claim.yaml"
 	@echo "✅ Open WebUI claim generated at $(WEBUI_DIR)/generated/$(CLUSTER)-claim.yaml"
