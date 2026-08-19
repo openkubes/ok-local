@@ -1,0 +1,43 @@
+{
+  "distSpecVersion": "1.1.0",
+  "storage": {
+    "rootDirectory": "/var/lib/registry",
+    "dedupe": false,
+    "gc": true,
+    "gcDelay": "10s",
+    "gcInterval": "30s"
+  },
+  "http": {
+    "address": "0.0.0.0",
+    "port": "5000",
+    "auth": {
+      "htpasswd": {
+        "path": "/secret/htpasswd"
+      }
+    },
+    "accessControl": {
+      "metrics": {
+        "users": ["admin"]
+      },
+      "repositories": {
+        "**": {
+          "policies": [
+            { "users": ["ci"],     "actions": ["read", "create", "update"] },
+            { "users": ["puller"], "actions": ["read"] }
+          ],
+          "defaultPolicy": []
+        }
+      },
+      "adminPolicy": {
+        "users": ["admin"],
+        "actions": ["read", "create", "update", "delete"]
+      }
+    }
+  },
+  "log": { "level": "info" },
+  "extensions": {
+    "search": { "enable": true },
+    "metrics": { "enable": true, "prometheus": { "path": "/metrics" } },
+    "scrub": { "enable": true, "interval": "1m" }
+  }
+}

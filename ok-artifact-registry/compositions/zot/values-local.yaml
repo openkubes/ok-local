@@ -1,0 +1,93 @@
+# registry-default (zot) — ok-local Phase-1 values (OK-137)
+# Curated per ADR-Platform-028 §6: OCI core, authn/authz, metrics, GC,
+# storage-integrity (scrub), search/discovery. NO sync, NO UI, NO scanning.
+#
+# This is DEV / ok-local only. ok-shared (Phase 2 / OK-138) uses a separate
+# values file with real OIDC (Keycloak/ADR-020), cert-manager TLS (ADR-010),
+# Vault-backed secrets (ADR-025) and production storage.
+
+image:
+  repository: ghcr.io/project-zot/zot
+  # v2.1.20 fixes the Referrers API, empty-blob, and digest validation failures
+  # observed with the chart's v2.1.18 appVersion during the OCI contract run.
+  tag: "v2.1.20"
+  pullPolicy: IfNotPresent
+
+# Local access via `kubectl port-forward` (see Makefile `port-forward`).
+# No ingress/TLS locally — ingress + cert-manager are a Phase-2 (ok-shared) concern.
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: false
+
+# Persist blobs so restarts / GC / scrub behave like the real thing.
+persistence: true
+pvc:
+  create: true
+  accessModes: ["ReadWriteOnce"]
+  storage: 8Gi
+  storageClassName: local-path   # K3s default provisioner on ok-local
+
+# Prometheus exporter sidecar; requires the metrics extension in config.json (below).
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false   # set true once a Prometheus Operator is present locally
+
+# htpasswd is provided out-of-band by `make secret` (NOT committed).
+# The chart mounts this secret's keys as files under mountPath.
+externalSecrets:
+  - secretName: zot-htpasswd
+    mountPath: /secret
+
+# authHeader lets the k8s probes authenticate when anonymous access is denied.
+# Injected at deploy time by the Makefile (`--set-string authHeader=...`);
+# do NOT hardcode a credential here.
+# authHeader: "<base64 user:pass>"
+
+# Curated zot configuration (mounted at /etc/zot/config.json).
+# Keep this in sync with compositions/zot/config.reference.json.
+mountConfig: true
+configFiles:
+  config.json: |-
+    {
+      "distSpecVersion": "1.1.0",
+      "storage": {
+        "rootDirectory": "/var/lib/registry",
+        "dedupe": false,
+        "gc": true,
+        "gcDelay": "10s",
+        "gcInterval": "30s"
+      },
+      "http": {
+        "address": "0.0.0.0",
+        "port": "5000",
+        "auth": { "htpasswd": { "path": "/secret/htpasswd" } },
+        "accessControl": {
+          "metrics": {
+            "users": ["admin"]
+          },
+          "repositories": {
+            "**": {
+              "policies": [
+                { "users": ["ci"],     "actions": ["read", "create", "update"] },
+                { "users": ["puller"], "actions": ["read"] }
+              ],
+              "defaultPolicy": []
+            }
+          },
+          "adminPolicy": {
+            "users": ["admin"],
+            "actions": ["read", "create", "update", "delete"]
+          }
+        }
+      },
+      "log": { "level": "info" },
+      "extensions": {
+        "search":  { "enable": true },
+        "metrics": { "enable": true, "prometheus": { "path": "/metrics" } },
+        "scrub":   { "enable": true, "interval": "1m" }
+      }
+    }
