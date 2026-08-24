@@ -1,0 +1,36 @@
+ticket: OK-156
+sources:
+  openkubes:
+    repository: https://github.com/openkubes/openkubes.git
+    revision: 6a0a56a4140dab3d55ade4a926c09412781e1407
+  ok-cluster:
+    repository: https://github.com/openkubes/ok-cluster.git
+    revision: 03381d239454d8bb7aacc65908e8d3512ee376c1
+charts:
+  kagent-crds:
+    version: 0.9.12
+    digest: sha256:85174e69eab19e05fcf82dbfda86e8e84c2be97a52c645d60cf1ae51ccbca977
+  kagent:
+    version: 0.9.12
+    digest: sha256:ec0dacc1a76edbd190a554757c8bdb193ccb0b35deeb35f6d7a7e7ffc76d99fd
+  kagent-tools:
+    version: 0.2.1
+    digest: sha256:a4bbb3f3b8e12ecb6f54689638acb9524bf110b9eade828225f9bbe190d5dcb7
+images:
+  kagent-controller: ghcr.io/kagent-dev/kagent/controller:0.9.12@sha256:d1ea7b70bb8d97de9f0774d44b598971c944b3ab4e88294b0bb78e59d1a63c15
+  kagent-go-agent: ghcr.io/kagent-dev/kagent/golang-adk:0.9.12@sha256:058ca9fc1a9ac994dde3354a7df56f5a6b93222572eda40ba295da2f0b6c101b
+  kagent-tools: ghcr.io/kagent-dev/kagent/tools:0.2.1@sha256:50b431281d3e32666f27a292962fd486aabaac157083a844d037c12137e353aa
+  kagent-ui: ghcr.io/kagent-dev/kagent/ui:0.9.12@sha256:1d5ada8d7f65a6b9ad28232463f9fd670c4c20875baa1c8008aaa1f1f988382e
+  kmcp-controller: ghcr.io/kagent-dev/kmcp/controller:0.3.0@sha256:86ab878da25a639358aad18933c6b99e06a7ac34a801dc17fd657db0f28cee28
+  postgres: docker.io/library/postgres:18.3-alpine@sha256:54451ecb8ab38c24c3ec123f2fd501303a3a1856a5c66e98cecf2460d5e1e9d7
+  ollama: docker.io/ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+  fixture-busybox: docker.io/library/busybox:1.36@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+  fixture-pause: registry.k8s.io/pause:3.10@sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a
+  fixture-missing: registry.k8s.io/pause@sha256:0000000000000000000000000000000000000000000000000000000000000000
+model:
+  name: qwen3:4b
+  expected_id: 359d7dd4bcda
+  published_size: 2.5GB
+  context_length: 4096
+  keep_alive: 0s
+  purpose: accepted local candidate with the documented targeted-tool boundary

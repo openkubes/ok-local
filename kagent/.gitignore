@@ -1,0 +1,4 @@
+.sources/
+.venv/
+.values.local.yaml
+.access.local/

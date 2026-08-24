@@ -429,11 +429,16 @@ $(OLLAMA_MANIFESTS)/statefulset.yaml:
 	  '    spec:' \
 	  '      containers:' \
 	  '        - name: ollama' \
-	  '          image: ollama/ollama:latest' \
+	  '          image: docker.io/ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad' \
 	  '          imagePullPolicy: IfNotPresent' \
 	  '          ports:' \
 	  '            - name: http' \
 	  '              containerPort: 11434' \
+	  '          env:' \
+	  '            - name: OLLAMA_CONTEXT_LENGTH' \
+	  '              value: "4096"' \
+	  '            - name: OLLAMA_KEEP_ALIVE' \
+	  '              value: "0s"' \
 	  '          startupProbe:' \
 	  '            httpGet:' \
 	  '              path: /api/tags' \

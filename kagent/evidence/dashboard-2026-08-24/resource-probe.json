@@ -1,0 +1,110 @@
+{
+  "answer": "Observed evidence for pod `healthy-8464c8f4b4-ngbnt` in `kagent-lab`:\n- **Status**: `Running`\n- **Containers**: `healthy` container `Ready: True`\n- **Conditions**: `Ready: True`, `ContainersReady: True`, `PodScheduled: True`\n- **Events**: No errors (all events show normal scheduling and container startup)\n\nThis evidence confirms the pod is healthy.",
+  "duration_seconds": 59.11,
+  "finished_at": "2026-08-24T09:35:07.746634+00:00",
+  "maxima": {
+    "node_cpu_millicores": 3837,
+    "node_memory_mib": 6246,
+    "ollama_cpu_millicores": 3613,
+    "ollama_memory_mib": 3620
+  },
+  "message_id": "ok156-resource-1787564048",
+  "prompt": "Resource type: pod. Resource name: healthy-8464c8f4b4-ngbnt. Namespace: kagent-lab. Determine whether this pod is healthy and cite exact Kubernetes evidence. Use the Kubernetes tool before answering.",
+  "raw_response_sha256": "a1895bbf30e23560b0c5b101e7d0d24263f778bf56c678dcd089c1e820cc0300",
+  "result": "PASS",
+  "samples": [
+    {
+      "captured_at": "2026-08-24T09:34:08.636850+00:00",
+      "node_cpu_millicores": 75,
+      "node_memory_mib": 2798,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:13.727521+00:00",
+      "node_cpu_millicores": 75,
+      "node_memory_mib": 2798,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:18.812091+00:00",
+      "node_cpu_millicores": 75,
+      "node_memory_mib": 2798,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:23.897984+00:00",
+      "node_cpu_millicores": 2169,
+      "node_memory_mib": 6219,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:28.988166+00:00",
+      "node_cpu_millicores": 2169,
+      "node_memory_mib": 6219,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:34.069138+00:00",
+      "node_cpu_millicores": 2169,
+      "node_memory_mib": 6219,
+      "ollama_cpu_millicores": 1,
+      "ollama_memory_mib": 166
+    },
+    {
+      "captured_at": "2026-08-24T09:34:39.153368+00:00",
+      "node_cpu_millicores": 3683,
+      "node_memory_mib": 4561,
+      "ollama_cpu_millicores": 2746,
+      "ollama_memory_mib": 3594
+    },
+    {
+      "captured_at": "2026-08-24T09:34:44.252209+00:00",
+      "node_cpu_millicores": 3683,
+      "node_memory_mib": 4561,
+      "ollama_cpu_millicores": 2746,
+      "ollama_memory_mib": 3594
+    },
+    {
+      "captured_at": "2026-08-24T09:34:49.338243+00:00",
+      "node_cpu_millicores": 3683,
+      "node_memory_mib": 4561,
+      "ollama_cpu_millicores": 2746,
+      "ollama_memory_mib": 3594
+    },
+    {
+      "captured_at": "2026-08-24T09:34:54.422688+00:00",
+      "node_cpu_millicores": 3837,
+      "node_memory_mib": 6246,
+      "ollama_cpu_millicores": 3613,
+      "ollama_memory_mib": 3620
+    },
+    {
+      "captured_at": "2026-08-24T09:34:59.510993+00:00",
+      "node_cpu_millicores": 3837,
+      "node_memory_mib": 6246,
+      "ollama_cpu_millicores": 3613,
+      "ollama_memory_mib": 3620
+    },
+    {
+      "captured_at": "2026-08-24T09:35:04.600728+00:00",
+      "node_cpu_millicores": 3837,
+      "node_memory_mib": 6246,
+      "ollama_cpu_millicores": 3613,
+      "ollama_memory_mib": 3620
+    }
+  ],
+  "started_at": "2026-08-24T09:34:08.636526+00:00",
+  "tool_call": {
+    "args": {
+      "namespace": "kagent-lab",
+      "resource_name": "healthy-8464c8f4b4-ngbnt",
+      "resource_type": "pod"
+    },
+    "name": "k8s_describe_resource"
+  }
+}

@@ -7,6 +7,8 @@ infra-local.kubeconfig
 
 # Generated files
 cloud-init.yaml
+ollama/
+platform/
 
 # macOS
 .DS_Store
