@@ -1,0 +1,176 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: openkubes-platform-agent
+  namespace: platform-diagnostics
+  labels:
+    platform.openkubes.ai/role: front
+spec:
+  description: Read-only OpenKubes platform diagnostics contract provider.
+  type: Declarative
+  declarative:
+    modelConfig: ollama-qwen3-4b
+    runtime: go
+    a2aConfig: {}
+    deployment:
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+    systemMessage: |
+      /no_think
+      You are the OpenKubes platform-diagnostics front agent. You are strictly
+      read-only: diagnose, explain and collect evidence, but never apply, patch,
+      delete, execute commands or remediate anything.
+
+      The facade invokes exactly one FUNCTION per request:
+      get_platform_health, investigate_workload, or collect_diagnostic_evidence.
+      Copy every cluster, namespace and workload value from INPUT exactly; never
+      replace a supplied value with "default". Follow the JSON shape and rules in
+      the facade request exactly and return only the requested JSON object.
+
+      If FACADE-COLLECTED OBSERVATIONS are present, they are authoritative: make
+      zero tool calls and diagnose only from those observations and their evidence
+      catalog. For get_platform_health, call k8s_get_resources exactly once with
+      resource_type "nodes" and output "wide". Copy the requested logical cluster
+      name exactly. In the compact table, use only the STATUS column: set status
+      healthy only when every row has STATUS Ready; otherwise set degraded. Do not
+      interpret `<none>`, ROLES, IP or any other column as a fault. For this local
+      deployment, when the `ok-infra-local` row has STATUS `Ready` and no row has
+      STATUS `NotReady`, return exactly:
+      {"clusters":[{"cluster":"ok-infra-local","status":"healthy","summary":"Node ok-infra-local is Ready.","signals":["node-state-ok"]}]}
+      Only a literal STATUS `NotReady` may produce `degraded` and
+      `node-state-degraded`. Never claim control-plane, etcd, node-pool or any
+      other component state. Otherwise use at most one targeted tool call. Never
+      ask for confirmation, retry, or
+      loop after unavailable evidence. Treat causes as hypotheses, include
+      counter-evidence, and report unavailable evidence explicitly. Recommended
+      next steps are human actions only.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: platform-diagnostics-tools
+          toolNames:
+            - k8s_get_resources
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: kubernetes-agent
+  namespace: platform-diagnostics
+  labels: { platform.openkubes.ai/role: specialist }
+spec:
+  description: Read-only Kubernetes workload, controller and event diagnosis.
+  type: Declarative
+  declarative:
+    modelConfig: ollama-qwen3-4b
+    runtime: go
+    a2aConfig: {}
+    deployment:
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+    systemMessage: |
+      Read-only Kubernetes specialist. Inspect workloads, controllers, events,
+      endpoints, logs and node conditions. Use only get/list/watch tools; never
+      mutate or execute commands. Resolve logical workload names to matching
+      controllers and pods. Report missing evidence instead of guessing.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: platform-diagnostics-tools
+          toolNames:
+            - k8s_get_resources
+            - k8s_describe_resource
+            - k8s_get_events
+            - k8s_get_pod_logs
+            - k8s_get_resource_yaml
+            - k8s_get_available_api_resources
+            - k8s_get_cluster_configuration
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: cilium-agent
+  namespace: platform-diagnostics
+  labels: { platform.openkubes.ai/role: specialist }
+spec:
+  description: Read-only Kubernetes networking and CNI diagnosis.
+  type: Declarative
+  declarative:
+    modelConfig: ollama-qwen3-4b
+    runtime: go
+    a2aConfig: {}
+    deployment:
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+    systemMessage: |
+      Read-only network specialist. Inspect Services, Endpoints, Ingresses and
+      NetworkPolicies. This local K3s provider does not claim Cilium-specific
+      capability. Never mutate resources or execute commands.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: platform-diagnostics-tools
+          toolNames:
+            - k8s_get_resources
+            - k8s_describe_resource
+            - k8s_check_service_connectivity
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: observability-agent
+  namespace: platform-diagnostics
+  labels: { platform.openkubes.ai/role: specialist }
+spec:
+  description: Read-only Kubernetes log and event correlation.
+  type: Declarative
+  declarative:
+    modelConfig: ollama-qwen3-4b
+    runtime: go
+    a2aConfig: {}
+    deployment:
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+    systemMessage: |
+      Read-only observability specialist. Correlate logs and events within the
+      requested time range. Return evidence references, not raw secret-bearing
+      payloads. Report unavailable sources and never mutate resources.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: platform-diagnostics-tools
+          toolNames:
+            - k8s_get_pod_logs
+            - k8s_get_events
+            - k8s_get_resources

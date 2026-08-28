@@ -135,6 +135,9 @@ spec:
                   namespace: open-webui
                   values:
                     fullnameOverride: open-webui
+                    image:
+                      repository: ghcr.io/open-webui/open-webui
+                      tag: "0.9.5@sha256:e045bde3b004cc7f8c319412345eb56c87ea6ac57031534a31ca37ad5424beb3"
                     workload:
                       kind: StatefulSet
                     ollama:
@@ -145,6 +148,11 @@ spec:
                       enabled: false
                     redis:
                       enabled: false
+                    websocket:
+                      redis:
+                        image:
+                          repository: redis
+                          tag: "7.4.2-alpine3.21@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952"
                     persistence:
                       enabled: true
                       storageClass: local-path
@@ -439,6 +447,20 @@ $(OLLAMA_MANIFESTS)/statefulset.yaml:
 	  '              value: "4096"' \
 	  '            - name: OLLAMA_KEEP_ALIVE' \
 	  '              value: "0s"' \
+	  '            # qwen3 supports Flash Attention; q8_0 halves the KV cache so' \
+	  '            # the OK-156 10k diagnostics context remains below 6 GiB.' \
+	  '            - name: OLLAMA_FLASH_ATTENTION' \
+	  '              value: "1"' \
+	  '            - name: OLLAMA_KV_CACHE_TYPE' \
+	  '              value: "q8_0"' \
+	  '            - name: OLLAMA_MAX_LOADED_MODELS' \
+	  '              value: "1"' \
+	  '            # The llama.cpp prompt checkpoint cache grows outside the KV' \
+	  '            # budget and OOMs this 6 GiB CPU pod after an agentic turn.' \
+	  '            - name: LLAMA_ARG_CACHE_RAM' \
+	  '              value: "512"' \
+	  '            - name: LLAMA_ARG_CTX_CHECKPOINTS' \
+	  '              value: "0"' \
 	  '          startupProbe:' \
 	  '            httpGet:' \
 	  '              path: /api/tags' \

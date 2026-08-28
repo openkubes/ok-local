@@ -1,0 +1,37 @@
+image:
+  repository: ghcr.io/openclaw/openclaw
+  tag: "2026.7.1@sha256:6a31d44b2944e7adcd2b582bf6fb463111264ebca97a0201795b799135bd102c"
+  pullPolicy: IfNotPresent
+
+gateway:
+  port: 18789
+  bind: lan
+  token: ""
+
+ollama:
+  baseUrl: http://ollama.ollama.svc.cluster.local:11434
+  model: qwen3:4b-instruct-2507-q4_K_M
+  # The global allowlist reduces the measured prompt to ~5224 tokens. OpenClaw
+  # reserves 4096 more; 10k is the smallest stable, memory-safe local setting.
+  numCtx: 10240
+  maxTokens: 2048
+  keepAlive: "5m"
+  timeoutSeconds: 1800
+
+limits:
+  timeoutSeconds: 1800
+
+diagnostics:
+  contractVersion: 1.0.0-draft
+  defaultCluster: ok-infra-local
+  mcp:
+    url: http://platform-diagnostics-mcp.platform-diagnostics.svc.cluster.local:8080/mcp
+    connectTimeoutSeconds: 10
+    timeoutSeconds: 900
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { cpu: "1", memory: 1Gi }
+
+serviceAccount:
+  name: openclaw

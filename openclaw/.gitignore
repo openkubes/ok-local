@@ -1,0 +1,5 @@
+.sources/
+.token
+.webui-password
+.webui-config-backup.json
+.evidence/

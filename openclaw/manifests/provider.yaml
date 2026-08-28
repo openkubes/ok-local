@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: platform-diagnostics-tools
+  namespace: platform-diagnostics
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: platform-diagnostics-readonly
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log, pods/status, services, endpoints, events, nodes, namespaces, persistentvolumeclaims, persistentvolumes, resourcequotas, limitranges]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments, replicasets, statefulsets, daemonsets]
+    verbs: [get, list, watch]
+  - apiGroups: [batch]
+    resources: [jobs, cronjobs]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses, networkpolicies]
+    verbs: [get, list, watch]
+  - apiGroups: [metrics.k8s.io]
+    resources: [pods, nodes]
+    verbs: [get, list]
+  - apiGroups: [cilium.io]
+    resources: [ciliumendpoints, ciliumnetworkpolicies, ciliumclusterwidenetworkpolicies, ciliumnodes, ciliumidentities]
+    verbs: [get, list, watch]
+  - apiGroups: [cluster.x-k8s.io]
+    resources: [clusters, machines, machinedeployments, machinesets]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: platform-diagnostics-readonly
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: platform-diagnostics-readonly
+subjects:
+  - kind: ServiceAccount
+    name: platform-diagnostics-tools
+    namespace: platform-diagnostics
+---
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: ollama-qwen3-4b
+  namespace: platform-diagnostics
+spec:
+  provider: Ollama
+  model: qwen3:4b-instruct-2507-q4_K_M
+  ollama:
+    host: http://ollama.ollama.svc.cluster.local:11434
+    options:
+      # Match OpenClaw so Ollama can reuse one runner instead of retaining
+      # separate 4k and 10k KV caches during the serial diagnostic chain.
+      num_ctx: "10240"
+      # Contract replies are bounded JSON, not long-form text. This prevents a
+      # malformed agent turn from consuming the full CPU context.
+      num_predict: "4096"
+      temperature: "0"
+      seed: "42"
+      keep_alive: "5m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-diagnostics-tools
+  namespace: platform-diagnostics
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: platform-diagnostics-tools }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: platform-diagnostics-tools }
+    spec:
+      serviceAccountName: platform-diagnostics-tools
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: tools
+          image: ghcr.io/kagent-dev/kagent/tools:0.2.1@sha256:50b431281d3e32666f27a292962fd486aabaac157083a844d037c12137e353aa
+          command: [/tool-server]
+          args: [--port, "8084", --metrics-port, "8085"]
+          env:
+            - name: KAGENT_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: OTEL_TRACING_ENABLED
+              value: "false"
+            - name: TOKEN_PASSTHROUGH
+              value: "false"
+          ports:
+            - { name: http-tools, containerPort: 8084 }
+            - { name: http-metrics, containerPort: 8085 }
+          readinessProbe:
+            httpGet: { path: /health, port: http-tools }
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: "1", memory: 512Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-diagnostics-tools
+  namespace: platform-diagnostics
+spec:
+  selector: { app.kubernetes.io/name: platform-diagnostics-tools }
+  ports: [{ name: http-tools, port: 8084, targetPort: http-tools }]
+---
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: platform-diagnostics-tools
+  namespace: platform-diagnostics
+spec:
+  description: Read-only cluster inspection tools.
+  protocol: STREAMABLE_HTTP
+  url: http://platform-diagnostics-tools.platform-diagnostics.svc.cluster.local:8084/mcp
+  timeout: 30s
+  sseReadTimeout: 5m0s
+  terminateOnClose: true
