@@ -14,7 +14,7 @@ fixture image digests, and local model settings are recorded in
 The `cluster-inspector` Agent exposes only `k8s_describe_resource`. Its effective
 Kubernetes identity is the `kagent-tools` ServiceAccount, which may read normal
 Kubernetes resources but may not write resources, read Secrets, or use wildcard
-permissions. `make verify-phase1` checks this boundary against the live API
+permissions. `make verify-kagent` checks this boundary against the live API
 server; prompts and tool descriptions are not treated as security controls.
 
 ## Prerequisites
@@ -51,7 +51,7 @@ cluster/model boundary, verify the OCI chart digests, and render all inputs.
 ```bash
 make -C kagent install
 make -C kagent status
-make -C kagent verify-phase1
+make -C kagent verify-kagent
 ```
 
 `install` is idempotent. It also pins the fixture images, applies the targeted

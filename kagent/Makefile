@@ -50,7 +50,7 @@ UPSTREAM_VARS = \
 
 .PHONY: help sources venv source-check cluster-check preflight access-summary \
 	access-test chart-lock-check render-check model-pull model-check install fixture-images \
-	agent-policy mcp-reconcile status verify-access verify-phase1 restart-test lifecycle-test dashboard \
+	agent-policy mcp-reconcile status verify-access verify-kagent restart-test lifecycle-test dashboard \
 	logs uninstall verify-clean clean-generated
 
 help: ## Show the safe OK-156 Phase-1 workflow
@@ -67,7 +67,7 @@ help: ## Show the safe OK-156 Phase-1 workflow
 	@echo "  make model-pull      Pull the pinned Ollama model"
 	@echo "  make install         Install the pinned read-only profile"
 	@echo "  make verify-access   Prove read yes; writes/Secrets/wildcards no"
-	@echo "  make verify-phase1   Verify the complete live Phase-1 contract"
+	@echo "  make verify-kagent   Verify the complete live kagent contract"
 	@echo "  make restart-test    Restart Controller and Agent and verify recovery"
 	@echo "  make lifecycle-test  Clean-uninstall and identically reinstall"
 	@echo "  make status          Show releases, workloads and agent resources"
@@ -158,7 +158,7 @@ install: preflight ## Install the pinned read-only standalone profile
 	@$(MAKE) --no-print-directory fixture-images
 	@$(MAKE) --no-print-directory agent-policy
 	@$(MAKE) --no-print-directory mcp-reconcile
-	@$(MAKE) --no-print-directory verify-phase1
+	@$(MAKE) --no-print-directory verify-kagent
 
 fixture-images: cluster-check
 	@kubectl --kubeconfig "$(KUBECONFIG)" --namespace kagent-lab scale \
@@ -208,7 +208,7 @@ status: sources venv cluster-check
 verify-access: sources venv cluster-check
 	@$(MAKE) -C "$(UPSTREAM_DIR)" verify-access $(UPSTREAM_VARS)
 
-verify-phase1: cluster-check
+verify-kagent: cluster-check
 	@python3 scripts/verify_phase1.py --kubeconfig "$(KUBECONFIG)"
 
 restart-test: cluster-check ## Restart Controller and Agent and verify recovery
@@ -220,7 +220,7 @@ restart-test: cluster-check ## Restart Controller and Agent and verify recovery
 	  kubectl --kubeconfig "$(KUBECONFIG)" --namespace kagent rollout status \
 	    deployment/cluster-inspector --timeout=5m; \
 	  $(MAKE) --no-print-directory mcp-reconcile; \
-	  $(MAKE) --no-print-directory verify-phase1; \
+	  $(MAKE) --no-print-directory verify-kagent; \
 	  printf 'Restart recovery PASS started=%s duration_seconds=%s\n' "$$started" "$$SECONDS"
 
 lifecycle-test: cluster-check ## Clean-uninstall and identically reinstall Phase 1
