@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="500" viewBox="0 0 1280 500" role="img" aria-labelledby="title desc">
+  <title id="title">Local AI diagnostics acceptance path</title>
+  <desc id="desc">An ordered workflow builds the local foundation, verifies read-only kagent, and proves five authenticated end-to-end scenarios.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#42526e"/></marker>
+    <style>.title{font:700 24px Arial,sans-serif;fill:#172b4d}.box{fill:#f4f5f7;stroke:#8993a4;stroke-width:2}.blue{fill:#deebff;stroke:#0052cc;stroke-width:2}.green{fill:#e3fcef;stroke:#00875a;stroke-width:2}.head{font:700 18px Arial,sans-serif;fill:#172b4d}.small{font:14px Arial,sans-serif;fill:#42526e}.edge{fill:none;stroke:#42526e;stroke-width:3;marker-end:url(#arrow)}.pass{font:700 18px Arial,sans-serif;fill:#00875a}</style>
+  </defs>
+  <rect width="1280" height="500" fill="#fff"/>
+  <text x="640" y="40" text-anchor="middle" class="title">From Local Installation to Sanitized Acceptance Evidence</text>
+  <rect x="44" y="112" width="260" height="210" rx="18" class="box"/>
+  <text x="174" y="154" text-anchor="middle" class="head">Local foundation</text>
+  <text x="174" y="194" text-anchor="middle" class="small">Two K3s clusters</text>
+  <text x="174" y="222" text-anchor="middle" class="small">Ollama + Qwen3</text>
+  <text x="174" y="250" text-anchor="middle" class="small">Open WebUI</text>
+  <text x="174" y="288" text-anchor="middle" class="small">make setup</text>
+  <rect x="372" y="112" width="260" height="210" rx="18" class="blue"/>
+  <text x="502" y="154" text-anchor="middle" class="head">Read-only kagent</text>
+  <text x="502" y="194" text-anchor="middle" class="small">healthy</text>
+  <text x="502" y="222" text-anchor="middle" class="small">imagepull</text>
+  <text x="502" y="250" text-anchor="middle" class="small">crashloop · exit 42</text>
+  <text x="502" y="288" text-anchor="middle" class="small">verify-kagent</text>
+  <rect x="700" y="112" width="260" height="210" rx="18" class="blue"/>
+  <text x="830" y="154" text-anchor="middle" class="head">OpenClaw integration</text>
+  <text x="830" y="194" text-anchor="middle" class="small">3 MCP functions</text>
+  <text x="830" y="222" text-anchor="middle" class="small">authenticated Open WebUI</text>
+  <text x="830" y="250" text-anchor="middle" class="small">5 end-to-end scenarios</text>
+  <text x="830" y="288" text-anchor="middle" class="small">make verify</text>
+  <rect x="1028" y="112" width="208" height="210" rx="18" class="green"/>
+  <text x="1132" y="154" text-anchor="middle" class="head">Evidence</text>
+  <text x="1132" y="194" text-anchor="middle" class="pass">PASS × 5</text>
+  <text x="1132" y="230" text-anchor="middle" class="small">answer hashes</text>
+  <text x="1132" y="258" text-anchor="middle" class="small">timings</text>
+  <text x="1132" y="286" text-anchor="middle" class="small">resource maxima</text>
+  <path d="M304 217 H358" class="edge"/><path d="M632 217 H686" class="edge"/><path d="M960 217 H1014" class="edge"/>
+  <rect x="200" y="370" width="880" height="62" rx="14" fill="#ffebe6" stroke="#de350b" stroke-width="2"/>
+  <text x="640" y="407" text-anchor="middle" class="small">Excluded from evidence: credentials · prompts · response bodies · raw Kubernetes logs</text>
+  <text x="640" y="468" text-anchor="middle" class="small">Function, security boundaries, recovery, and clean reinstallation are all verified.</text>
+</svg>
