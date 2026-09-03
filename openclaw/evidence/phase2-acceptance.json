@@ -1,0 +1,88 @@
+{
+  "entrypoint": "authenticated Open WebUI /openai/chat/completions",
+  "generated_at": "2026-08-28T07:10:28.986883+00:00",
+  "resource_maxima": {
+    "ollama/ollama-0": {
+      "cpu_millicores": 3945,
+      "memory_mib": 4260
+    },
+    "open-webui/open-webui-0": {
+      "cpu_millicores": 17,
+      "memory_mib": 686
+    },
+    "open-webui/open-webui-redis-54557667c5-rw2f7": {
+      "cpu_millicores": 4,
+      "memory_mib": 5
+    },
+    "openclaw/openclaw-7c8b469695-8f5bl": {
+      "cpu_millicores": 310,
+      "memory_mib": 405
+    },
+    "platform-diagnostics/cilium-agent-c5f5d984b-k2bvk": {
+      "cpu_millicores": 1,
+      "memory_mib": 6
+    },
+    "platform-diagnostics/kubernetes-agent-656f986df7-w9t6b": {
+      "cpu_millicores": 1,
+      "memory_mib": 6
+    },
+    "platform-diagnostics/observability-agent-6664bb69b4-cwn8q": {
+      "cpu_millicores": 1,
+      "memory_mib": 6
+    },
+    "platform-diagnostics/openkubes-platform-agent-854f84b6c9-sh9d9": {
+      "cpu_millicores": 2,
+      "memory_mib": 23
+    },
+    "platform-diagnostics/platform-diagnostics-7ccd6b4d68-fxz5g": {
+      "cpu_millicores": 5,
+      "memory_mib": 60
+    },
+    "platform-diagnostics/platform-diagnostics-mcp-adapter-6cbc6765f6-hkkqb": {
+      "cpu_millicores": 2,
+      "memory_mib": 44
+    },
+    "platform-diagnostics/platform-diagnostics-tools-75bfd5d64b-bjwnk": {
+      "cpu_millicores": 11,
+      "memory_mib": 61
+    }
+  },
+  "scenarios": [
+    {
+      "answer_sha256": "483d2a7d33c04e7c5c4df1ecd65bf65c808dedf5cae47bf06b060c4e93ed0521",
+      "duration_seconds": 277.554,
+      "name": "platform health",
+      "result": "PASS",
+      "source": "get_platform_health"
+    },
+    {
+      "answer_sha256": "11da3a0bb28f52440b4ca27e4cb4bab726b15ff9798f728a4fe94a1077ffa481",
+      "duration_seconds": 131.788,
+      "name": "healthy workload",
+      "result": "PASS",
+      "source": "investigate_workload"
+    },
+    {
+      "answer_sha256": "91139c62bc1be3c79aab94871f62341da24273388242c4f28cbcd24a4aa60df9",
+      "duration_seconds": 913.091,
+      "name": "ImagePullBackOff workload",
+      "result": "PASS",
+      "source": "investigate_workload"
+    },
+    {
+      "answer_sha256": "3b952ac783b32c458eadf4118dd17c1f9d57ee2dba5e822a1d0e272419c18624",
+      "duration_seconds": 827.169,
+      "name": "CrashLoopBackOff workload",
+      "result": "PASS",
+      "source": "investigate_workload"
+    },
+    {
+      "answer_sha256": "4ad1cd5aec65d5573246bb1d1b0a46a8b13142033250cf7002b3a50b7ded9d77",
+      "duration_seconds": 136.343,
+      "name": "diagnostic evidence",
+      "result": "PASS",
+      "source": "collect_diagnostic_evidence"
+    }
+  ],
+  "schema": "ok156-phase2-evidence-v1"
+}

@@ -7,8 +7,53 @@ infra-local.kubeconfig
 
 # Generated files
 cloud-init.yaml
+ollama/
+platform/
 
 # macOS
 .DS_Store
 __MACOSX/
+
+# Other operating-system and editor metadata
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environment and credential files
+.env
+.env.*
+!.env.example
+!.env.sample
+.direnv/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# JavaScript dependencies and common generated build output
+node_modules/
+dist/
+build/
+coverage/
+
+# Local runtime and temporary output
+.cache/
+*.log
+*.pid
+*.tmp
+*.temp
+
+# Terraform local state and provider cache
+.terraform/
+*.tfstate
+*.tfstate.*
 mgmt-local-tunnel.kubeconfig

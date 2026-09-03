@@ -1,0 +1,81 @@
+# OK-156 Phase 1: minimal, read-only standalone kagent on ok-infra-local.
+# The endpoint is rendered into a mode-0600, Git-ignored local values file.
+registry: ghcr.io
+
+providers:
+  default: ollama
+  ollama:
+    provider: Ollama
+    model: qwen3:4b
+    config:
+      host: ${OLLAMA_URL}
+      options:
+        num_ctx: "4096"
+
+controller:
+  replicas: 1
+  auth:
+    mode: unsecure
+  image:
+    tag: "0.9.12@sha256:d1ea7b70bb8d97de9f0774d44b598971c944b3ab4e88294b0bb78e59d1a63c15"
+  agentImage:
+    tag: "0.9.12@sha256:058ca9fc1a9ac994dde3354a7df56f5a6b93222572eda40ba295da2f0b6c101b"
+
+ui:
+  image:
+    tag: "0.9.12@sha256:1d5ada8d7f65a6b9ad28232463f9fd670c4c20875baa1c8008aaa1f1f988382e"
+
+database:
+  postgres:
+    vectorEnabled: false
+    bundled:
+      enabled: true
+      storage: 500Mi
+      image:
+        tag: "18.3-alpine@sha256:54451ecb8ab38c24c3ec123f2fd501303a3a1856a5c66e98cecf2460d5e1e9d7"
+
+kmcp:
+  enabled: true
+  image:
+    tag: "0.3.0@sha256:86ab878da25a639358aad18933c6b99e06a7ac34a801dc17fd657db0f28cee28"
+
+kagent-tools:
+  enabled: true
+  tools:
+    enabledTools:
+      - k8s
+    image:
+      tag: "0.2.1@sha256:50b431281d3e32666f27a292962fd486aabaac157083a844d037c12137e353aa"
+    args:
+      - --read-only
+  rbac:
+    create: true
+    readOnly: true
+    allowSecrets: false
+
+# Keep the standalone profile minimal. The versioned cluster-inspector is
+# applied separately from the pinned openkubes research assets.
+k8s-agent:
+  enabled: false
+kgateway-agent:
+  enabled: false
+istio-agent:
+  enabled: false
+promql-agent:
+  enabled: false
+observability-agent:
+  enabled: false
+argo-rollouts-agent:
+  enabled: false
+helm-agent:
+  enabled: false
+cilium-policy-agent:
+  enabled: false
+cilium-manager-agent:
+  enabled: false
+cilium-debug-agent:
+  enabled: false
+grafana-mcp:
+  enabled: false
+querydoc:
+  enabled: false

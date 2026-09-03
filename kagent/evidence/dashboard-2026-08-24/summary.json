@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "case": "crashloop",
+      "duration_seconds": 128,
+      "result": "PASS",
+      "session_id": "01a03314-79bc-70ad-b4da-5f768aec34cf",
+      "tool": "k8s_describe_resource"
+    },
+    {
+      "case": "imagepull",
+      "duration_seconds": 106,
+      "result": "PASS",
+      "session_id": "01a03316-e231-7056-aabe-aade4a272bc6",
+      "tool": "k8s_describe_resource"
+    },
+    {
+      "case": "healthy",
+      "duration_seconds": 105,
+      "result": "PASS",
+      "session_id": "01a03319-12da-75b1-8a52-17e016551b2b",
+      "tool": "k8s_describe_resource"
+    }
+  ],
+  "source": "kagent Dashboard"
+}

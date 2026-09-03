@@ -1,0 +1,39 @@
+sources:
+  openkubes:
+    repository: https://github.com/openkubes/openkubes.git
+    revision: 15d339517b4b79ff1bee5584ac5e5d60c29ff178
+  profile_a_compatibility_revision:
+    repository: https://github.com/openkubes/openkubes.git
+    revision: 6a0a56a4140dab3d55ade4a926c09412781e1407
+images:
+  open_webui:
+    reference: ghcr.io/open-webui/open-webui:0.9.5
+    digest: sha256:e045bde3b004cc7f8c319412345eb56c87ea6ac57031534a31ca37ad5424beb3
+  open_webui_redis:
+    reference: docker.io/library/redis:7.4.2-alpine3.21
+    digest: sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
+  mcp_adapter:
+    reference: ghcr.io/openkubes/platform-diagnostics-mcp-adapter:0.1.0
+    digest: sha256:a291bc1706a630c0b5c2452fd940440fb7e8b895bcc9582148f723dc07dd7029
+  facade:
+    reference: ghcr.io/openkubes/platform-diagnostics-facade:0.1.7
+    digest: sha256:9babaeb0ebaf49c281d31b9aa184de821d7d0c64d8c60e50a8564e0da94a0cf3
+  openclaw:
+    reference: ghcr.io/openclaw/openclaw:2026.7.1
+    digest: sha256:6a31d44b2944e7adcd2b582bf6fb463111264ebca97a0201795b799135bd102c
+  kagent_tools:
+    reference: ghcr.io/kagent-dev/kagent/tools:0.2.1
+    digest: sha256:50b431281d3e32666f27a292962fd486aabaac157083a844d037c12137e353aa
+models:
+  diagnostics:
+    reference: qwen3:4b-instruct-2507-q4_K_M
+    note: Official Qwen3 4B non-thinking instruct variant required for kagent 0.9.12 tool calls.
+contract:
+  version: 1.0.0-draft
+  note: >-
+    The explicitly selected adapter 0.1.0 and facade 0.1.7 predate the
+    Contract-Consumer bearer-token and invocation-id additions.
+charts:
+  open_webui:
+    repository: https://helm.openwebui.com/
+    version: 14.6.0

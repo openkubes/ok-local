@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">Local AI diagnostics topology</title>
+  <desc id="desc">A management cluster deploys to a workload cluster containing the authenticated read-only AI diagnostics path.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#42526e"/></marker>
+    <style>
+      .title{font:700 24px Arial,sans-serif;fill:#172b4d}.cluster{fill:#f4f5f7;stroke:#8993a4;stroke-width:2}.active{fill:#deebff;stroke:#0052cc;stroke-width:2}.node{fill:#eae6ff;stroke:#5e4db2;stroke-width:2}.safe{fill:#e3fcef;stroke:#00875a;stroke-width:2}.label{font:700 16px Arial,sans-serif;fill:#172b4d}.small{font:14px Arial,sans-serif;fill:#42526e}.edge{fill:none;stroke:#42526e;stroke-width:2.5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1280" height="520" fill="#fff"/>
+  <text x="640" y="40" text-anchor="middle" class="title">OpenKubes — Local Read-Only Diagnostics Topology</text>
+  <rect x="42" y="82" width="300" height="350" rx="18" class="cluster"/>
+  <text x="192" y="116" text-anchor="middle" class="label">ok-mgmt-local</text>
+  <text x="192" y="142" text-anchor="middle" class="small">Management cluster</text>
+  <rect x="88" y="188" width="208" height="82" rx="12" class="node"/>
+  <text x="192" y="221" text-anchor="middle" class="label">Crossplane</text>
+  <text x="192" y="246" text-anchor="middle" class="small">declarative deployment</text>
+  <rect x="380" y="82" width="858" height="350" rx="18" class="active"/>
+  <text x="809" y="116" text-anchor="middle" class="label">ok-infra-local — Workload cluster</text>
+  <rect x="414" y="188" width="126" height="82" rx="12" class="node"/>
+  <text x="477" y="221" text-anchor="middle" class="label">Open WebUI</text>
+  <text x="477" y="246" text-anchor="middle" class="small">login + chat</text>
+  <rect x="568" y="188" width="126" height="82" rx="12" class="node"/>
+  <text x="631" y="221" text-anchor="middle" class="label">OpenClaw</text>
+  <text x="631" y="246" text-anchor="middle" class="small">consumer</text>
+  <rect x="722" y="188" width="126" height="82" rx="12" class="node"/>
+  <text x="785" y="214" text-anchor="middle" class="label">MCP adapter</text>
+  <text x="785" y="241" text-anchor="middle" class="small">3 functions</text>
+  <rect x="876" y="188" width="126" height="82" rx="12" class="node"/>
+  <text x="939" y="221" text-anchor="middle" class="label">Facade</text>
+  <text x="939" y="246" text-anchor="middle" class="small">contract</text>
+  <rect x="1030" y="188" width="126" height="82" rx="12" class="node"/>
+  <text x="1093" y="221" text-anchor="middle" class="label">kagent</text>
+  <text x="1093" y="246" text-anchor="middle" class="small">diagnostics</text>
+  <rect x="876" y="322" width="280" height="72" rx="12" class="safe"/>
+  <text x="1016" y="351" text-anchor="middle" class="label">platform-diagnostics-tools</text>
+  <text x="1016" y="376" text-anchor="middle" class="small">the only Kubernetes API identity</text>
+  <path d="M296 229 H398" class="edge"/>
+  <path d="M540 229 H554" class="edge"/>
+  <path d="M694 229 H708" class="edge"/>
+  <path d="M848 229 H862" class="edge"/>
+  <path d="M1002 229 H1016" class="edge"/>
+  <path d="M1093 270 V302 H1016 V310" class="edge"/>
+  <text x="348" y="214" text-anchor="middle" class="small">deploys</text>
+  <text x="640" y="474" text-anchor="middle" class="small">Human question → authenticated UI → allowlisted diagnostics → scoped Kubernetes evidence</text>
+</svg>
