@@ -10,6 +10,19 @@ Mac (Multipass host)
 
 ---
 
+## Video Tutorials — Getting Started with OpenKubes Local
+
+Prefer to watch before you try it? These three videos complement the written tutorials below. Open a thumbnail to watch on YouTube.
+
+| Video 1 | Video 2 | Video 3 |
+|---|---|---|
+| [![Watch OpenKubes Local video 1](https://i.ytimg.com/vi/_LJ8tCLHrO0/hqdefault.jpg)](https://youtu.be/_LJ8tCLHrO0) | [![Watch OpenKubes Local video 2](https://i.ytimg.com/vi/9cA7ECNWxAE/hqdefault.jpg)](https://youtu.be/9cA7ECNWxAE) | [![Watch OpenKubes Local video 3](https://i.ytimg.com/vi/uHEeXkqJ5FE/hqdefault.jpg)](https://youtu.be/uHEeXkqJ5FE) |
+| [Watch video 1](https://youtu.be/_LJ8tCLHrO0) | [Watch video 2](https://youtu.be/9cA7ECNWxAE) | [Watch video 3](https://youtu.be/uHEeXkqJ5FE) |
+
+For current commands and prerequisites, follow the [Quick Start](#quick-start) and the [written tutorials](#tutorials); video recordings may reflect an earlier revision.
+
+---
+
 ## Quick Start
 
 ```bash
