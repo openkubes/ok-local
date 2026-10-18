@@ -41,42 +41,86 @@ brew install multipass kubectl
 
 ## Step 1 — Launch a Multipass VM
 
-First generate a cloud-init file that injects your SSH key into the VM at boot:
+This is a **disposable local development VM**, not a production setup. Run these steps in the same macOS terminal, with Multipass and Python 3 installed. Ensure your Mac has sufficient memory and disk space.
+
+First check that you have a matching SSH key pair and generate cloud-init in a private temporary directory. Stop if the key check fails:
 
 ```bash
-cat > /tmp/cloud-init.yaml << EOF
+if [ -f "$HOME/.ssh/id_ed25519.pub" ] && [ -f "$HOME/.ssh/id_ed25519" ]; then
+  SSH_PUB="$HOME/.ssh/id_ed25519.pub"
+elif [ -f "$HOME/.ssh/id_rsa.pub" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
+  SSH_PUB="$HOME/.ssh/id_rsa.pub"
+else
+  echo 'Generate an SSH key pair first.' >&2; exit 1
+fi
+ssh-keygen -lf "$SSH_PUB" >/dev/null || exit 1
+CLOUD_INIT_DIR="$(mktemp -d)"
+CLOUD_INIT_FILE="$CLOUD_INIT_DIR/cloud-init.yaml"
+cat > "$CLOUD_INIT_FILE" <<EOF
 package_update: true
 package_upgrade: false
 users:
   - name: ubuntu
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-      - $(cat ~/.ssh/id_ed25519.pub 2>/dev/null || cat ~/.ssh/id_rsa.pub)
+      - $(cat "$SSH_PUB")
 EOF
+chmod 600 "$CLOUD_INIT_FILE"
 ```
 
-Launch the VM:
+**Security note:** `NOPASSWD:ALL` grants passwordless sudo *inside this development VM*. Do not use this convenience in production. Cloud-init contains the public, never the private, SSH key.
+
+Launch only if the named instance does not already exist; inspect existing VMs manually instead of overwriting them:
 
 ```bash
+if multipass info kubevirt-local >/dev/null 2>&1; then
+  echo 'kubevirt-local already exists. Stop and inspect it.' >&2; exit 1
+fi
 multipass launch 24.04 \
   --name kubevirt-local \
   --cpus 4 \
   --memory 8G \
   --disk 40G \
-  --cloud-init /tmp/cloud-init.yaml
+  --cloud-init "$CLOUD_INIT_FILE"
 ```
 
-Get the VM IP and accept the SSH host key:
+Confirm the VM is running with `multipass info kubevirt-local` before continuing. Remove the temporary cloud-init directory only after successful provisioning and inspection.
+
+Get the VM address from its structured Multipass instance data instead of searching a CSV table:
 
 ```bash
-export VM_IP=$(multipass list --format csv | grep kubevirt-local | cut -d',' -f3 | tr -d ' ')
+VM_IP="$(multipass info kubevirt-local --format json | python3 -c '
+import ipaddress, json, sys
+ips = json.load(sys.stdin)["info"]["kubevirt-local"]["ipv4"]
+valid = [ip for ip in ips if ipaddress.ip_address(ip).version == 4
+         and not ipaddress.ip_address(ip).is_loopback]
+if len(valid) != 1: raise SystemExit("Expected exactly one IPv4 address")
+print(valid[0])
+')" || exit 1
 echo "VM IP: $VM_IP"
-
-ssh-keyscan $VM_IP >> ~/.ssh/known_hosts
 ```
 
----
+**Do not blindly trust `ssh-keyscan`.** Compare the key seen over the network against the host key obtained through the trusted local Multipass control channel, then add it only if no entry for that IP already exists:
 
+```bash
+EXPECTED="$(multipass exec kubevirt-local -- sudo cat /etc/ssh/ssh_host_ed25519_key.pub)" || exit 1
+SCANNED="$(ssh-keyscan -T 5 -t ed25519 "$VM_IP" 2>/dev/null)" || exit 1
+EXPECTED_KEY="$(printf '%s\n' "$EXPECTED" | awk 'NR==1 {print $1 " " $2}')"
+SCANNED_KEY="$(printf '%s\n' "$SCANNED" | awk 'NR==1 {print $2 " " $3}')"
+if [ -z "$EXPECTED_KEY" ] || [ "$EXPECTED_KEY" != "$SCANNED_KEY" ]; then
+  echo 'SSH host key mismatch: investigate before proceeding.' >&2; exit 1
+fi
+mkdir -p "$HOME/.ssh"; chmod 700 "$HOME/.ssh"
+touch "$HOME/.ssh/known_hosts"; chmod 600 "$HOME/.ssh/known_hosts"
+if ssh-keygen -F "$VM_IP" -f "$HOME/.ssh/known_hosts" >/dev/null; then
+  echo 'Existing known_hosts entry: verify manually; do not overwrite.' >&2; exit 1
+fi
+printf '%s\n' "$SCANNED" >> "$HOME/.ssh/known_hosts"
+```
+
+This check assumes the local Multipass management channel and VM are trusted; it is not a production host-identity policy.
+
+---
 ## Step 2 — Install K3s
 
 SSH into the VM:
