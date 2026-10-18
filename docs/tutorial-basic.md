@@ -69,7 +69,7 @@ EOF
 [ -s "$CLOUD_INIT_FILE" ] || return 1
 chmod 600 "$CLOUD_INIT_FILE" || return 1
 }
-ok_step1_cloud_init || printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2
+ok_step1_cloud_init || { printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2; false; }
 ```
 
 **Security note:** `NOPASSWD:ALL` grants passwordless sudo *inside this development VM*. Do not use this convenience in production. Cloud-init contains the public, never the private, SSH key.
@@ -88,7 +88,7 @@ multipass launch 24.04 \
   --disk 40G \
   --cloud-init "$CLOUD_INIT_FILE" || return 1
 }
-ok_step1_launch || printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2
+ok_step1_launch || { printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2; false; }
 ```
 
 Confirm the VM is running with `multipass info kubevirt-local` before continuing. Remove the temporary cloud-init directory only after successful provisioning and inspection.
@@ -108,7 +108,7 @@ print(valid[0])
 [ -n "$VM_IP" ] || return 1
 echo "VM IP: $VM_IP"
 }
-ok_step1_address || printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2
+ok_step1_address || { printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2; false; }
 ```
 
 **Do not blindly trust `ssh-keyscan`.** Compare the key seen over the network against the host key obtained through the trusted local Multipass control channel, then add it only if no entry for that IP already exists:
@@ -129,7 +129,7 @@ if ssh-keygen -F "$VM_IP" -f "$HOME/.ssh/known_hosts" >/dev/null; then
 fi
 printf '%s\n' "$SCANNED" >> "$HOME/.ssh/known_hosts" || return 1
 }
-ok_step1_host_key || printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2
+ok_step1_host_key || { printf '%s\n' 'Step 1 block failed. STOP: resolve the issue before continuing.' >&2; false; }
 ```
 
 This check assumes the local Multipass management channel and VM are trusted; it is not a production host-identity policy.
